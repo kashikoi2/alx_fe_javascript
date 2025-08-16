@@ -1,50 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dynamic Quote Generator</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 24px; }
-    h1 { margin-bottom: 8px; }
-    #quoteDisplay {
-      border: 2px solid #333; border-radius: 8px; padding: 16px;
-      min-height: 60px; margin: 12px 0; max-width: 800px;
-    }
-    .row { margin: 8px 0; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-    input, select, button { padding: 8px; }
-    .spacer { flex: 1; }
-  </style>
 </head>
 <body>
   <h1>Dynamic Quote Generator</h1>
 
-  <!-- Current quote -->
-  <div id="quoteDisplay">Click “Show New Quote” to start.</div>
+  <!-- Quote Display -->
+  <div id="quoteDisplay"></div>
+  <button onclick="displayRandomQuote()">Show Random Quote</button>
 
-  <!-- Controls -->
-  <div class="row">
-    <button id="newQuote">Show New Quote</button>
-
-    <label for="categorySelect">Filter by category:</label>
-    <select id="categorySelect">
-      <option value="all">All</option>
-    </select>
-
-    <span class="spacer"></span>
-
-    <!-- Export / Import JSON -->
-    <button id="exportJsonBtn">Export Quotes (JSON)</button>
-    <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
-  </div>
-
-  <!-- Add new quote -->
+  <!-- Add New Quote -->
   <h2>Add a New Quote</h2>
-  <div class="row">
-    <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
-    <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
-    <button id="addQuoteBtn">Add Quote</button>
-  </div>
+  <input type="text" id="quoteText" placeholder="Enter a quote" />
+  <input type="text" id="quoteCategory" placeholder="Enter category" />
+  <button onclick="addQuote()">Add Quote</button>
+
+  <!-- Category Filter -->
+  <h2>Filter Quotes</h2>
+  <select id="categoryFilter" onchange="filterQuotes()">
+    <option value="all">All Categories</option>
+  </select>
+
+  <!-- Import / Export -->
+  <h2>Import & Export</h2>
+  <button id="exportJsonBtn">Export Quotes</button>
+  <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
 
   <script src="script.js"></script>
 </body>
