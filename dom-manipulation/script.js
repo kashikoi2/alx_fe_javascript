@@ -14,7 +14,7 @@ const addQuoteBtn = document.getElementById("addQuoteBtn");
 /**
  * Display a random quote (with category filtering)
  */
-function displayRandomQuote() {
+function displayRandomQuote () {
   let selectedCategory = categorySelect.value;
 
   // Filter quotes if a category is selected
