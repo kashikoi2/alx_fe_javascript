@@ -11,9 +11,13 @@ const newQuoteBtn = document.getElementById("newQuote");
 const categorySelect = document.getElementById("categorySelect");
 const addQuoteBtn = document.getElementById("addQuoteBtn");
 
-// Show Random Quote
-function showRandomQuote() {
+/**
+ * Display a random quote (with category filtering)
+ */
+function displayRandomQuote() {
   let selectedCategory = categorySelect.value;
+
+  // Filter quotes if a category is selected
   let filteredQuotes = (selectedCategory === "all")
     ? quotes
     : quotes.filter(q => q.category === selectedCategory);
@@ -23,12 +27,17 @@ function showRandomQuote() {
     return;
   }
 
+  // Pick a random quote
   let randomIndex = Math.floor(Math.random() * filteredQuotes.length);
   let quote = filteredQuotes[randomIndex];
+
+  // Update DOM (no innerHTML used)
   quoteDisplay.textContent = `"${quote.text}" — (${quote.category})`;
 }
 
-// Add Quote
+/**
+ * Add a new quote dynamically
+ */
 function addQuote() {
   let textInput = document.getElementById("newQuoteText");
   let categoryInput = document.getElementById("newQuoteCategory");
@@ -37,9 +46,10 @@ function addQuote() {
   let newCategory = categoryInput.value.trim();
 
   if (newText && newCategory) {
+    // Add to quotes array
     quotes.push({ text: newText, category: newCategory });
 
-    // Add new category to dropdown if not already there
+    // Add new category to dropdown if it doesn't exist
     if (![...categorySelect.options].some(opt => opt.value === newCategory)) {
       let option = document.createElement("option");
       option.value = newCategory;
@@ -47,7 +57,7 @@ function addQuote() {
       categorySelect.appendChild(option);
     }
 
-    // Clear input fields
+    // Reset form
     textInput.value = "";
     categoryInput.value = "";
 
@@ -57,7 +67,9 @@ function addQuote() {
   }
 }
 
-// Populate dropdown with existing categories
+/**
+ * Populate categories on load
+ */
 function populateCategories() {
   let categories = [...new Set(quotes.map(q => q.category))];
   categories.forEach(cat => {
@@ -71,8 +83,8 @@ function populateCategories() {
 }
 
 // Event Listeners
-newQuoteBtn.addEventListener("click", showRandomQuote);
+newQuoteBtn.addEventListener("click", displayRandomQuote);
 addQuoteBtn.addEventListener("click", addQuote);
 
-// Initialize categories
+// Initialize categories when page loads
 populateCategories();
