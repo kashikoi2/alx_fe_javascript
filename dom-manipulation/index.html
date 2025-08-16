@@ -1,33 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Dynamic Quote Generator</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; }
+    h1 { margin-bottom: 8px; }
+    #quoteDisplay {
+      border: 2px solid #333; border-radius: 8px; padding: 16px;
+      min-height: 60px; margin: 12px 0; max-width: 800px;
+    }
+    .row { margin: 8px 0; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    input, select, button, label { padding: 8px; }
+    .spacer { flex: 1; }
+    #notifications > .note {
+      border: 1px solid #ccc; padding: 8px; border-radius: 8px; margin: 6px 0;
+    }
+    #lastSyncAt { font-style: italic; }
+  </style>
 </head>
 <body>
   <h1>Dynamic Quote Generator</h1>
 
   <!-- Quote Display -->
-  <div id="quoteDisplay"></div>
-  <button onclick="displayRandomQuote()">Show Random Quote</button>
+  <div id="quoteDisplay">Click “Show New Quote” to start.</div>
+
+  <!-- Controls -->
+  <div class="row">
+    <button id="newQuote">Show New Quote</button>
+
+    <label for="categoryFilter">Filter:</label>
+    <select id="categoryFilter">
+      <option value="all">All Categories</option>
+      <!-- dynamically populated -->
+    </select>
+
+    <button id="editCurrentBtn" title="Quickly edit the current quote to simulate conflicts">Edit Current Quote</button>
+
+    <span class="spacer"></span>
+
+    <!-- Sync controls -->
+    <button id="syncNowBtn">Sync Now</button>
+    <label><input type="checkbox" id="autoSyncToggle" /> Auto Sync</label>
+    <span id="lastSyncAt" aria-live="polite"></span>
+  </div>
 
   <!-- Add New Quote -->
   <h2>Add a New Quote</h2>
-  <input type="text" id="quoteText" placeholder="Enter a quote" />
-  <input type="text" id="quoteCategory" placeholder="Enter category" />
-  <button onclick="addQuote()">Add Quote</button>
-
-  <!-- Category Filter -->
-  <h2>Filter Quotes</h2>
-  <select id="categoryFilter" onchange="filterQuotes()">
-    <option value="all">All Categories</option>
-  </select>
+  <div class="row">
+    <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
+    <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
+    <button id="addQuoteBtn">Add Quote</button>
+  </div>
 
   <!-- Import / Export -->
   <h2>Import & Export</h2>
-  <button id="exportJsonBtn">Export Quotes</button>
-  <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
+  <div class="row">
+    <button id="exportJsonBtn">Export Quotes</button>
+    <input type="file" id="importFile" accept=".json" />
+  </div>
+
+  <!-- Notifications / Conflicts -->
+  <h2>Updates & Conflicts</h2>
+  <div id="notifications" aria-live="polite"></div>
 
   <script src="script.js"></script>
 </body>
