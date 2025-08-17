@@ -18,6 +18,8 @@ const newQuoteCategory = document.getElementById("newQuoteCategory");
 const exportJsonBtn = document.getElementById("exportJsonBtn");
 const importFileInput = document.getElementById("importFile");
 const newQuoteBtn = document.getElementById("newQuote");
+const syncNotification = document.getElementById("syncNotification");
+const addQuoteBtn = document.getElementById("addQuoteBtn");
 
 // ===== Utilities =====
 function saveQuotes() {
@@ -117,17 +119,9 @@ function importFromJsonFile(event) {
   reader.readAsText(file);
 }
 
-// ===== Sync Quotes (POST + GET) =====
-async function syncQuotes() {
+// ===== Fetch from Server (GET) =====
+async function fetchQuotesFromServer() {
   try {
-    // --- POST local quotes to server ---
-    await fetch("https://jsonplaceholder.typicode.com/posts", {
-      method: "POST",                 // Required for check
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(quotes)
-    });
-
-    // --- GET quotes from server ---
     const res = await fetch("https://jsonplaceholder.typicode.com/posts?_limit=5");
     const data = await res.json();
     const serverQuotes = data.map(p => ({
@@ -137,22 +131,59 @@ async function syncQuotes() {
       updatedAt: Date.now(),
       source: "server"
     }));
+    return serverQuotes;
+  } catch (err) {
+    console.error("Failed to fetch from server:", err);
+    return [];
+  }
+}
 
-    // --- Merge quotes (server wins conflicts) ---
+// ===== Post to Server (POST) =====
+async function postQuotesToServer() {
+  try {
+    await fetch("https://jsonplaceholder.typicode.com/posts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(quotes)
+    });
+  } catch (err) {
+    console.error("Failed to post quotes to server:", err);
+  }
+}
+
+// ===== Sync Quotes (POST + GET + Conflict Resolution) =====
+async function syncQuotes() {
+  try {
+    await postQuotesToServer();
+    const serverQuotes = await fetchQuotesFromServer();
+
+    // Merge server quotes with local quotes (server wins conflicts)
     const merged = [...quotes];
+    let conflictsResolved = false;
     serverQuotes.forEach(srv => {
       const idx = merged.findIndex(q => q.id === srv.id);
-      if (idx >= 0) merged[idx] = srv;
-      else merged.push(srv);
+      if (idx >= 0) {
+        merged[idx] = srv;
+        conflictsResolved = true;
+      } else {
+        merged.push(srv);
+      }
     });
 
     quotes = merged;
     saveQuotes();
     populateCategories();
     displayRandomQuote();
-    console.log("Quotes synced successfully!");
+
+    // UI Notification for conflicts or updates
+    if (conflictsResolved || serverQuotes.length) {
+      syncNotification.textContent = "Quotes synced with server!";
+      setTimeout(() => { syncNotification.textContent = ""; }, 5000);
+    }
   } catch (err) {
     console.error("Error syncing quotes:", err);
+    syncNotification.textContent = "Error syncing with server.";
+    setTimeout(() => { syncNotification.textContent = ""; }, 5000);
   }
 }
 
@@ -162,7 +193,7 @@ categoryFilter.addEventListener("change", () => {
   saveSelectedCategory(categoryFilter.value);
   displayRandomQuote();
 });
-document.getElementById("addQuoteBtn").addEventListener("click", addQuote);
+addQuoteBtn.addEventListener("click", addQuote);
 exportJsonBtn.addEventListener("click", exportQuotes);
 importFileInput.addEventListener("change", importFromJsonFile);
 
@@ -171,6 +202,6 @@ document.addEventListener("DOMContentLoaded", () => {
   populateCategories();
   displayRandomQuote();
 
-  // Periodic server sync every 30s
+  // Periodic sync every 30s
   setInterval(syncQuotes, 30000);
 });
