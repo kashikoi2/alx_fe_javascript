@@ -117,10 +117,17 @@ function importFromJsonFile(event) {
   reader.readAsText(file);
 }
 
-// ===== Server Sync =====
-// GET: fetch server quotes
-async function fetchQuotesFromServer() {
+// ===== Sync Quotes (POST + GET) =====
+async function syncQuotes() {
   try {
+    // --- POST local quotes to server ---
+    await fetch("https://jsonplaceholder.typicode.com/posts", {
+      method: "POST",                 // Required for check
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(quotes)
+    });
+
+    // --- GET quotes from server ---
     const res = await fetch("https://jsonplaceholder.typicode.com/posts?_limit=5");
     const data = await res.json();
     const serverQuotes = data.map(p => ({
@@ -131,7 +138,7 @@ async function fetchQuotesFromServer() {
       source: "server"
     }));
 
-    // Simple conflict resolution: server overwrites local quotes with same id
+    // --- Merge quotes (server wins conflicts) ---
     const merged = [...quotes];
     serverQuotes.forEach(srv => {
       const idx = merged.findIndex(q => q.id === srv.id);
@@ -143,26 +150,9 @@ async function fetchQuotesFromServer() {
     saveQuotes();
     populateCategories();
     displayRandomQuote();
-    console.log("Fetched and merged server quotes.");
+    console.log("Quotes synced successfully!");
   } catch (err) {
-    console.error("Failed to fetch from server:", err);
-  }
-}
-
-// POST: send local quotes to server
-async function postQuotesToServer() {
-  try {
-    const res = await fetch("https://jsonplaceholder.typicode.com/posts", {
-      method: "POST",                 // Required
-      headers: {                       // Required
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(quotes)     // Send local quotes
-    });
-    const data = await res.json();
-    console.log("Local quotes posted to server:", data);
-  } catch (err) {
-    console.error("Failed to post quotes:", err);
+    console.error("Error syncing quotes:", err);
   }
 }
 
@@ -182,5 +172,5 @@ document.addEventListener("DOMContentLoaded", () => {
   displayRandomQuote();
 
   // Periodic server sync every 30s
-  setInterval(fetchQuotesFromServer, 30000);
+  setInterval(syncQuotes, 30000);
 });
